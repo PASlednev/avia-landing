@@ -17,6 +17,13 @@
 
 html { scroll-behavior: smooth; }
 
+/* Large-desktop scaling. The whole layout is rem-based (type, spacing and the
+   max-width containers), so lifting the root size scales the design as one piece
+   instead of stranding a 1280px island in the middle of a 4K screen. */
+@media (min-width: 2000px) { html { font-size: 18px; } }
+@media (min-width: 2560px) { html { font-size: 21px; } }
+@media (min-width: 3200px) { html { font-size: 25px; } }
+
 html, body { height: 100%; }
 
 body {
@@ -53,6 +60,15 @@ iframe { border: 0; }
 
 /* Logo */
 .logo { display: inline-flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.logo__img {
+  display: block;
+  height: 2.25rem;
+  width: auto;
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
+  transition: transform 0.2s ease;
+}
+.logo:hover .logo__img { transform: translateY(-1px) scale(1.02); }
+@media (min-width: 768px) { .logo__img { height: 2.6rem; } }
 .logo__icon { font-size: 1.5rem; line-height: 1; }
 .logo__text {
   font-family: var(--f-display);
@@ -287,19 +303,58 @@ iframe { border: 0; }
   background-image:
     linear-gradient(rgba(20,180,232,0.3) 1px, transparent 1px),
     linear-gradient(90deg, rgba(20,180,232,0.3) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-size: 3.75rem 3.75rem;
 }
 .hero__glow {
   position: absolute;
   top: 33.333%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 600px;
-  height: 600px;
+  width: 37.5rem;
+  height: 37.5rem;
   border-radius: 50%;
   pointer-events: none;
   background: radial-gradient(circle, rgba(20,180,232,0.08) 0%, transparent 70%);
 }
+/* Aviation decor: plane + clouds drifting behind the hero copy */
+.hero__decor { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.hero__plane {
+  position: absolute;
+  top: 9%;
+  right: 1.5%;
+  width: clamp(100px, 13vw, 11.5rem);
+  height: auto;
+  opacity: 0.9;
+  filter: drop-shadow(0 14px 30px rgba(0,0,0,0.55));
+  animation: fly 7s ease-in-out infinite;
+}
+.hero__cloud { position: absolute; height: auto; opacity: 0.5; }
+.hero__cloud--1 { top: 24%; left: -3%; width: clamp(140px, 20vw, 18.75rem); animation: drift 26s linear infinite; }
+.hero__cloud--2 { bottom: 16%; right: 8%; width: clamp(100px, 14vw, 12.5rem); opacity: 0.35; animation: drift 34s linear infinite reverse; }
+.hero__cloud--3 { bottom: 26%; left: 12%; width: clamp(90px, 12vw, 10.6rem); opacity: 0.28; animation: drift 44s linear infinite; }
+@keyframes fly {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-16px) rotate(2deg); }
+}
+@keyframes drift {
+  from { transform: translateX(-8%); }
+  to   { transform: translateX(8%); }
+}
+/* On phones there is no corner the plane can occupy without landing on the badge,
+   so drop it and let the clouds carry the theme (the logo is winged anyway). */
+@media (max-width: 600px) {
+  .hero__plane { display: none; }
+  .hero__cloud--2, .hero__cloud--3 { display: none; }
+  .hero__cloud--1 { opacity: 0.35; }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .hero__plane { top: 10%; right: 0; opacity: 0.8; }
+  .hero__cloud--3 { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__plane, .hero__cloud { animation: none !important; }
+}
+
 .hero__content {
   position: relative;
   z-index: 10;
@@ -949,7 +1004,7 @@ iframe { border: 0; }
   opacity: 0.9;
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
-.partner img { display: block; height: 52px; width: auto; }
+.partner img { display: block; height: 3.25rem; width: auto; }
 .partner:hover,
 .partner:focus-visible {
   opacity: 1;
@@ -1072,7 +1127,7 @@ iframe { border: 0; }
 
 /* Operator / promo comparison table */
 .table-wrap { overflow-x: auto; margin: 1.25rem 0 1.5rem; border: 1px solid rgba(20,180,232,0.14); border-radius: 12px; }
-.op-table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 0.9rem; }
+.op-table { width: 100%; border-collapse: collapse; min-width: 40rem; font-size: 0.9rem; }
 .op-table th, .op-table td { padding: 0.85rem 0.9rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
 .op-table thead th { background: var(--panel); font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--lime); }
 .op-table tbody td, .op-table td { color: #C4DAEA; }
@@ -1083,6 +1138,14 @@ iframe { border: 0; }
 .op-table .op-btn:hover { filter: brightness(1.08); transform: translateY(-1px); color: #04121C; }
 .op-play { display: inline-flex; line-height: 0; transition: transform 0.2s ease, filter 0.2s ease; }
 .op-play:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+/* The vs page exists to show two columns side by side — a 640px min-width would
+   push Aviator off-screen on a phone, so let this one table shrink to fit. */
+@media (max-width: 700px) {
+  .op-table--vs { min-width: 0; font-size: 0.78rem; }
+  .op-table--vs th, .op-table--vs td { padding: 0.55rem 0.45rem; }
+  .op-table--vs td:first-child { width: 27%; }
+}
 
 /* Screenshot gallery (CR2) */
 .crg { margin: 1.5rem 0; max-width: 700px; margin-left: auto; margin-right: auto; }
